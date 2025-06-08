@@ -1502,6 +1502,7 @@ function append_sid($url, $params = false, $is_amp = true, $session_id = false, 
 {
 	global $_SID, $_EXTRA_URL, $phpbb_hook, $phpbb_path_helper;
 	global $phpbb_dispatcher;
+	global $user;
 
 	if ($params === '' || (is_array($params) && empty($params)))
 	{
@@ -1602,7 +1603,9 @@ function append_sid($url, $params = false, $is_amp = true, $session_id = false, 
 	if ($params === false)
 	{
 		// Append session id
-		if (!$session_id)
+		// Only append for registered users having a valid session
+		// @see https://www.phpbb.com/community/viewtopic.php?p=16066738#p16066738
+		if (!$session_id || !$user->data['is_registered'] || $user->data['is_bot'])
 		{
 			return $url . (($append_url) ? $url_delim . $append_url : '') . $anchor;
 		}
@@ -1638,7 +1641,16 @@ function append_sid($url, $params = false, $is_amp = true, $session_id = false, 
 
 	// Append session id and parameters (even if they are empty)
 	// If parameters are empty, the developer can still append his/her parameters without caring about the delimiter
-	return $url . (($append_url) ? $url_delim . $append_url . $amp_delim : $url_delim) . $params . ((!$session_id) ? '' : $amp_delim . 'sid=' . $session_id) . $anchor;
+	// Only append sid for registered users with a valid session
+	// @see https://www.phpbb.com/community/viewtopic.php?p=16056085#p16056085
+	if ($session_id  && $user->data['is_registered'])
+	{
+		return $url . (($append_url) ? $url_delim . $append_url . $amp_delim : $url_delim) . $params . ((!$session_id) ? '' : $amp_delim . 'sid=' . $session_id) . $anchor;
+	}
+	else
+	{
+		return $url . (($append_url) ? $url_delim . $append_url . $amp_delim : $url_delim) . $params . $anchor;
+	}
 }
 
 /**
