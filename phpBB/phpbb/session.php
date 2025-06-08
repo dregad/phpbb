@@ -359,6 +359,13 @@ class session
 			$this->data = $db->sql_fetchrow($result);
 			$db->sql_freeresult($result);
 
+			// Protection against stupid bots
+			// Redirect requests with an expired sid parameter to a static page
+			// @see https://www.phpbb.com/community/viewtopic.php?p=16056085#p16056085
+			if (!isset($this->data['user_id'])) {
+				redirect("/expired.php");
+			}
+
 			// Did the session exist in the DB?
 			if (isset($this->data['user_id']))
 			{
