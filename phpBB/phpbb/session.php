@@ -361,8 +361,11 @@ class session
 
 			// Protection against stupid bots
 			// Redirect requests with an expired sid parameter to a static page
+			// But not if the sid is set in the cookie
 			// @see https://www.phpbb.com/community/viewtopic.php?p=16056085#p16056085
-			if (!isset($this->data['user_id'])) {
+			if (!isset($this->data['user_id'])
+				&& !$request->is_set($config['cookie_name'] . '_sid', \phpbb\request\request_interface::COOKIE)
+			) {
 				redirect("expired.php");
 			}
 
